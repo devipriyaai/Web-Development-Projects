@@ -1,5 +1,5 @@
 from django.apps import AppConfig
 
 
-class CkdappConfig(AppConfig):
+class ckdAppConfig(AppConfig):
     name = 'ckdApp'

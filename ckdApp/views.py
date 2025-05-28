@@ -53,43 +53,32 @@ class dataUploadView(View):
     def post(self, request, *args, **kwargs):
         #print('inside post')
         form = self.form_class(request.POST, request.FILES)
-        #print('inside form')
         if form.is_valid():
             form.save()
-            data_bgr= request.POST.get('Blood_Glucose_Random')
-            data_bu=request.POST.get('Blood_Urea')
-            data_sc=request.POST.get('Serum_Creatine')
-            data_pcv=request.POST.get('Packed_cell_volume')
-            data_wc=request.POST.get('White_blood_count')
-            #print (data)
-            #dataset1=pd.read_csv("prep.csv",index_col=None)
-            dicc={'yes':1,'no':0}
-            filename = 'model_RF_classification.sav'
+            data_maxtemp = float(request.POST.get('maxtemp'))
+            data_dewpoint = float(request.POST.get('dewpoint'))
+            data_humidity = float(request.POST.get('humidity'))
+            data_cloud = float(request.POST.get('cloud'))
+            data_sunshine = float(request.POST.get('sunshine'))
+            data_windspeed = float(request.POST.get('windspeed'))
+
+            filename = 'finalaized_model_RandomForestClassifier.sav'
             classifier = pickle.load(open(filename, 'rb'))
 
-            data = np.array([data_bgr,data_bu,data_sc,data_pcv,data_wc])
-            #sc = StandardScaler()
-            #data = sc.fit_transform(data.reshape(-1,1))
-            out=classifier.predict(data.reshape(1,-1))
-# providing an index
-            #ser = pd.DataFrame(data, index =['bgr','bu','sc','pcv','wbc'])
+            data = np.array([data_maxtemp, data_dewpoint, data_humidity, data_cloud, data_sunshine, data_windspeed])
+            out = classifier.predict(data.reshape(1, -1))
 
-            #ss=ser.T.squeeze()
-#data_for_prediction = X_test1.iloc[0,:].astype(float)
+            # out is a numpy array like [1], so pass the scalar value to template
+            out_value = out[0]
 
-#data_for_prediction =obj.pca(np.array(data_for_prediction),y_test)
-            #obj=ckd()
-            ##plt.savefig("static/force_plot.png",dpi=150, bbox_inches='tight')
-
-
-
-
-
-
-
-            return render(request, "succ_msg.html", {'data_bgr':data_bgr,'data_bu':data_bu,'data_sc':data_sc,'data_pcv':data_pcv,'data_wc':data_wc,
-                                                        'out':out})
-
-
+            return render(request, "succ_msg.html", {
+                'data_maxtemp': data_maxtemp,
+                'data_dewpoint': data_dewpoint,
+                'data_humidity': data_humidity,
+                'data_cloud': data_cloud,
+                'data_sunshine': data_sunshine,
+                'data_windspeed': data_windspeed,
+                'out': out_value
+            })
         else:
             return redirect(self.failure_url)
